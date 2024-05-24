@@ -5,6 +5,13 @@ CHAIN_PORTS_FILE="chains_ports.json"
 # Define the path to the file that stores currently used ports
 CURRENT_USED_PORTS_FILE="current_used_ports.txt"
 
+# Function to create the JSON file if it doesn't exist
+initialize_json_file() {
+    if [ ! -f "$CHAIN_PORTS_FILE" ]; then
+        echo '{"chains": {}}' > "$CHAIN_PORTS_FILE"
+    fi
+}
+
 # Function to get currently used ports and save them to a file
 get_current_used_ports() {
     ss -tuln | awk 'NR>1 {print $5}' | awk -F: '{print $NF}' | sort -n | uniq > $CURRENT_USED_PORTS_FILE
@@ -89,6 +96,9 @@ add_new_chain() {
     else
         config_dir="$custom_config_path"
     fi
+
+    # Initialize JSON file if it doesn't exist
+    initialize_json_file
 
     # Get the currently used ports
     get_current_used_ports
