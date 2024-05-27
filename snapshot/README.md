@@ -20,11 +20,18 @@ This script automates the process of taking snapshots of Cosmos SDK-based blockc
 ### Input Format
 The script accepts chain information as input in the following format:
 
-### Example Command
+### Example Commands
+#### Terminal Command
+Run the script for a single chain:
+
 ```bash
 ./snapshot_script.sh "axelar|http://localhost:11117|/home/axelar/.axelar/data|mainnet"
 ```
-
+#### JSON file command (Recommended for Automation)
+Run the script for multiple chains using the JSON file:
+```bash
+/root/snapshot_script.sh /path/to/chains.json
+```
 ### Example JSON 
 ```json
 [
