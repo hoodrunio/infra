@@ -42,3 +42,6 @@ The script accepts chain information as input in the following format:
     }
 ]
 ```
+### Example Overview
+
+![image](https://github.com/hoodrunio/infra/assets/71728280/0538d9d8-7ba2-4847-a73e-f17e2f0a23c5)
