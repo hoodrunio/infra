@@ -12,8 +12,8 @@ NC='\033[0m' # No Color
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 
-DAEMON_PREFIX="d"
 SNAPSHOT_BASE_DIR="/var/www/snapshots"
+SNAPSHOT_LOG="/var/www/snapshots/snapshots_log.json"
 
 # Get the total number of cores and calculate 70% of it
 TOTAL_CORES=$(nproc)
@@ -24,6 +24,7 @@ process_chain() {
     RPC_ADDRESS=$2
     DATA_DIR=$3
     NETWORK_TYPE=$4
+    DAEMON=${5:-"${CHAIN}d"}
 
     # Check if the data directory is custom
     if [[ "$DATA_DIR" == /* ]]; then
@@ -32,7 +33,6 @@ process_chain() {
         DATA_DIR="$HOME/.${CHAIN}d/data"
     fi
 
-    DAEMON="${CHAIN}${DAEMON_PREFIX}"
     SNAPSHOT_DIR="${SNAPSHOT_BASE_DIR}/${NETWORK_TYPE}/${CHAIN}"
 
     echo -e "${BOLD}${MAGENTA}=============================="
@@ -43,6 +43,7 @@ process_chain() {
     echo -e "${CYAN}RPC Address: ${YELLOW}${RPC_ADDRESS}${NC}"
     echo -e "${CYAN}Data Directory: ${YELLOW}${DATA_DIR}${NC}"
     echo -e "${CYAN}Network Type: ${YELLOW}${NETWORK_TYPE}${NC}"
+    echo -e "${CYAN}Daemon: ${YELLOW}${DAEMON}${NC}"
 
     if ! systemctl is-active --quiet "$DAEMON"; then
         echo -e "${RED}Daemon $DAEMON is not running, skipping chain $CHAIN.${NC}"
@@ -77,6 +78,23 @@ process_chain() {
 
     sudo systemctl start "$DAEMON"
 
+    # Log snapshot details
+    DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    SIZE=$(du -sh "$SNAPSHOT_DIR/$SNAPSHOT_FILENAME" | cut -f1)
+    SNAPSHOT_LOG_ENTRY=$(jq -n \
+        --arg name "$CHAIN" \
+        --arg snapshot "$SNAPSHOT_FILENAME" \
+        --arg date "$DATE" \
+        --arg height "$BLOCK_HEIGHT" \
+        --arg size "$SIZE" \
+        '{name: $name, snapshot: $snapshot, date: $date, height: $height, size: $size}')
+    
+    if [ ! -f "$SNAPSHOT_LOG" ]; then
+        echo "[]" > "$SNAPSHOT_LOG"
+    fi
+
+    jq ". += [$SNAPSHOT_LOG_ENTRY]" "$SNAPSHOT_LOG" > tmp.$$.json && mv tmp.$$.json "$SNAPSHOT_LOG"
+
     echo -e "${CYAN}Snapshot completed: ${SNAPSHOT_FILENAME}${NC}"
     echo -e "${BOLD}${MAGENTA}=============================="
     echo -e " Process Completed: ${CHAIN} (${NETWORK_TYPE})"
@@ -91,12 +109,13 @@ if [[ "$1" == *.json ]]; then
         RPC_ADDRESS=$(echo "$CHAIN_INFO" | jq -r '.rpc_address')
         DATA_DIR=$(echo "$CHAIN_INFO" | jq -r '.data_dir')
         NETWORK_TYPE=$(echo "$CHAIN_INFO" | jq -r '.network_type')
-        process_chain "$CHAIN" "$RPC_ADDRESS" "$DATA_DIR" "$NETWORK_TYPE"
+        DAEMON=$(echo "$CHAIN_INFO" | jq -r '.daemon // empty')
+        process_chain "$CHAIN" "$RPC_ADDRESS" "$DATA_DIR" "$NETWORK_TYPE" "$DAEMON"
     done
 else
     # Read and parse parameters
     for CHAIN_INFO in "$@"; do
-        IFS='|' read -r CHAIN RPC_ADDRESS DATA_DIR NETWORK_TYPE <<< "$CHAIN_INFO"
-        process_chain "$CHAIN" "$RPC_ADDRESS" "$DATA_DIR" "$NETWORK_TYPE"
+        IFS='|' read -r CHAIN RPC_ADDRESS DATA_DIR NETWORK_TYPE DAEMON <<< "$CHAIN_INFO"
+        process_chain "$CHAIN" "$RPC_ADDRESS" "$DATA_DIR" "$NETWORK_TYPE" "$DAEMON"
     done
 fi
