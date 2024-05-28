@@ -27,6 +27,10 @@ Run the script for a single chain:
 ```bash
 ./snapshot_script.sh "axelar|http://localhost:11117|/home/axelar/.axelar/data|mainnet"
 ```
+or with a custom daemon name:
+```bash
+./snapshot_script.sh "celestia|http://localhost:26657|/home/celestia/.celestia/data|testnet|celestia-appd"
+```
 #### JSON file command (Recommended for Automation)
 Run the script for multiple chains using the JSON file:
 ```bash
@@ -46,6 +50,13 @@ Run the script for multiple chains using the JSON file:
         "rpc_address": "http://localhost:26657",
         "data_dir": "/home/cosmos/.gaiad/data",
         "network_type": "testnet"
+    },
+    {
+        "chain": "celestia",
+        "rpc_address": "http://localhost:26680",
+        "data_dir": "/home/celestia/.celestia/data",
+        "network_type": "mainnet",
+        "daemon": "celestia-appd"
     }
 ]
 ```
