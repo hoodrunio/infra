@@ -56,8 +56,6 @@
   A simple WASM utility for generating Aleo addresses.
   [https://github.com/hoodrunio/aleo-address-derivation](https://github.com/hoodrunio/aleo-address-derivation)
 
-Elbette, Starknet ve Monad bölümlerini daha kapsamlı hale getirdim. İşte güncellenmiş versiyon:
-
 ---
 
 ### **Monad Network**
