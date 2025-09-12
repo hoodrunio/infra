@@ -1,5 +1,15 @@
 ### Validator Infrastructure Details
 
+At **HoodRun**, our validator infrastructure is designed with three guiding principles: **security, redundancy, and rapid failover**.
+We operate bare-metal servers across multiple independent providers in Europe and US, with the ability to scale globally. Our setup ensures:
+
+* **>99.9% uptime** with proactive monitoring and automated remediation
+* **Fast recovery** backup nodes can be spun up in minutes
+* **Zero-trust access** no open SSH ports, all identity-based connections
+* **Key security** remote signing (Horcrux for cosmos-sdk based chains) and Vault-based key management
+
+This architecture allows us to maintain highly reliable validators while minimizing risks of downtime, slashing, or key compromise.
+
 **Hosting Strategy & Data Center Location**
 
 At HoodRun, we prioritize decentralization and security in our validator infrastructure. To avoid over-concentration and potential single points of failure, we carefully select data centers and hosting providers with low ecosystem centralization risk. Our validator nodes primarily run on **bare-metal servers**, giving us full control over performance and security.
@@ -7,9 +17,9 @@ At HoodRun, we prioritize decentralization and security in our validator infrast
 We currently operate with providers such as:
 
 * **OVH** (EU-central, Warsaw)
-* **FiberState**
-* **Mevspace**
-* **Cherry Servers**
+* **FiberState** (US)
+* **Mevspace** (EU)
+* **Cherry Servers** (US-Chicago)
 
 This allows for geographic and provider-level redundancy. We can provision new dedicated machines on short notice when needed, enabling fast failover and scaling.
 
@@ -17,9 +27,9 @@ This allows for geographic and provider-level redundancy. We can provision new d
 
 **Infrastructure & Security Architecture**
 
-#### Zero-Trust Access (SSH)
+#### Zero-Trust -Like- Access (SSH)
 
-All remote access is managed through **Tailscale / Tailnet**, a zero-trust networking solution. This ensures:
+All remote access is managed through **Tailscale / Tailnet**, a zero-trust like networking solution. This ensures:
 
 * No open SSH ports on the public internet
 * Encrypted, identity-based access control
@@ -37,8 +47,8 @@ We employ a hybrid monitoring system combining open-source and in-house tools:
 
 **Validator Security Configuration**
 
-* **Remote Signing (Horcrux)**
-  Where supported, we implement distributed remote signing using Horcrux. This ensures:
+* **Remote Signing**
+  Where supported, we implement distributed remote signing services. This ensures:
 
   * The private key is never fully present on any single node
   * Signing operations are securely coordinated across multiple nodes
